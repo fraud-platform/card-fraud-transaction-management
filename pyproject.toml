@@ -1,0 +1,185 @@
+# AI AGENTS: This project uses DOPPLER for secrets (NEVER .env files)
+# Use: `uv run doppler-local`, `uv run doppler-test` (NOT `uv run dev`, `uv run test`)
+# See: AGENTS.md for canonical instructions
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "card-fraud-transaction-management"
+description = "Card Fraud Transaction Management - persistence and operationalization of fraud decision events (FastAPI)"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "aiokafka>=0.11",
+    "boto3>=1.35",
+    "httpx>=0.27",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.9",
+    "structlog>=24.1.0",
+    "opentelemetry-api>=1.39.1",
+    "opentelemetry-sdk>=1.39.1",
+    "opentelemetry-exporter-otlp>=1.39.1",
+    "opentelemetry-instrumentation-fastapi>=0.60b1",
+    "opentelemetry-instrumentation-sqlalchemy>=0.60b1",
+    "opentelemetry-instrumentation-httpx>=0.60b1",
+    "opentelemetry-semantic-conventions>=0.60b1",
+    "prometheus-client>=0.21",
+    "redis>=5.0",
+    "orjson>=3.10",
+    "tenacity>=8.2",
+    "asyncpg>=0.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "pytest-html>=4.1",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.27",
+    "factory-boy>=3.3.0",
+    "faker>=24.0.0",
+    "ruff>=0.8",
+    "pyflakes>=3.0",
+    "pre-commit>=3.6",
+]
+
+[project.scripts]
+# Development
+dev = "cli.dev:main"
+
+# Auth0 bootstrap and verification
+auth0-bootstrap = "cli.auth0_bootstrap:main"
+auth0-verify = "cli.auth0_verify:main"
+
+# Doppler Development (with secrets from Doppler)
+doppler-local = "cli.doppler_local:main"
+doppler-local-test = "cli.doppler_local:test_local"
+doppler-test-local = "cli.doppler_local:test_local"
+doppler-test = "cli.doppler_local:test"
+doppler-prod = "cli.doppler_local:test_prod"
+
+# Local Database Management
+db-local-up = "cli.db_local:up"
+db-local-down = "cli.db_local:down"
+db-local-reset = "cli.db_local:reset"
+
+# Local Redis Management
+redis-local-up = "cli.db_local:redis_up"
+redis-local-down = "cli.db_local:redis_down"
+
+# Local Kafka (Redpanda) Management
+kafka-local-up = "cli.db_local:kafka_up"
+kafka-local-down = "cli.db_local:kafka_down"
+kafka-local-reset = "cli.db_local:kafka_reset"
+
+# Local Object Storage Management (MinIO)
+objstore-local-up = "cli.objstore_local:up"
+objstore-local-down = "cli.objstore_local:down"
+objstore-local-reset = "cli.objstore_local:reset"
+objstore-local-verify = "cli.objstore_local:verify"
+
+# Local Infrastructure (PostgreSQL + MinIO + Redis + Redpanda)
+infra-check = "cli.infra_check:check"
+infra-local-up = "cli.db_local:infra_up"
+infra-local-down = "cli.db_local:infra_down"
+
+# Local Full Setup
+local-full-setup = "cli.db_setup:local_full_setup"
+
+# Neon Setup
+neon-setup = "cli.db_setup:neon_setup"
+neon-full-setup = "cli.db_setup:neon_full_setup"
+
+# Database Setup with Doppler
+db-init = "cli.db_setup:db_init"
+db-init-local = "cli.db_setup:db_init"
+db-init-test = "cli.db_setup:db_init_test"
+db-init-prod = "cli.db_setup:db_init_prod"
+db-reset-data = "cli.db_setup:db_reset_data"
+db-reset-data-local = "cli.db_setup:db_reset_data"
+db-reset-tables = "cli.db_setup:db_reset_tables"
+db-reset-tables-local = "cli.db_setup:db_reset_tables"
+# Legacy aliases (kept for backwards compatibility)
+db-reset-schema = "cli.db_setup:db_reset_tables"
+db-reset-schema-local = "cli.db_setup:db_reset_tables"
+db-reset-data-test = "cli.db_setup:db_reset_data_test"
+db-reset-tables-test = "cli.db_setup:db_reset_tables_test"
+db-reset-schema-test = "cli.db_setup:db_reset_tables_test"
+db-reset-data-prod = "cli.db_setup:db_reset_data_prod"
+db-reset-tables-prod = "cli.db_setup:db_reset_tables_prod"
+db-reset-schema-prod = "cli.db_setup:db_reset_tables_prod"
+db-verify = "cli.db_setup:db_verify"
+db-verify-local = "cli.db_setup:db_verify"
+db-verify-test = "cli.db_setup:db_verify_test"
+db-verify-prod = "cli.db_setup:db_verify_prod"
+db-sync-doppler-urls = "cli.db_setup:db_sync_doppler_urls"
+db-seed-demo = "cli.db_setup:db_seed_demo"
+
+# Testing
+test = "cli.test:main"
+test-v = "cli.test:test_v"
+test-all = "cli.test:test_all"
+test-smoke = "cli.test:test_smoke"
+test-e2e = "cli.test:test_e2e"
+
+# Code Quality
+lint = "cli.lint:main"
+format = "cli.lint:format"
+
+# Code Generation
+openapi = "cli.openapi:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "cli"]
+exclude = ["db*", "hooks*", "scripts*", "tests*"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI dependency injection requires Depends/Query in defaults
+"app/api/routes/**/*.py" = ["B008"]
+"app/core/dependencies.py" = ["B008"]
+"app/core/auth.py" = ["B008"]
+# Test conftest files need to set env vars before importing app modules
+"tests/conftest.py" = ["E402"]
+"tests/**/conftest.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--import-mode=prepend",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-branch",
+    "-m", "not e2e_integration",
+    "--html=htmlreports/index.html",
+    "--self-contained-html",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "unit: Fast unit tests with mocked dependencies (default)",
+    "integration: Integration tests with real database connections",
+    "smoke: Integration tests with TestClient and real DB",
+    "e2e_integration: End-to-end tests with real server and HTTP",
+]

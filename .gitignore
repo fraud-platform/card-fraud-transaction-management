@@ -1,0 +1,139 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+htmlreports/
+.tox/
+.nox/
+
+# Translations
+*.mo
+*.pot
+
+# Environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.idea/
+.vscode/
+.vscode-test/
+*.swp
+*.swo
+*~
+.fleet/
+.eclipse/
+.settings/
+*.sublime-project
+*.sublime-workspace
+.repl_history
+
+# AI Coding Assistants & Editors
+.claude/
+.cursor/
+.cursorrules
+.copilot/
+.codex/
+.windsurf/
+.windsurfrc
+.tabnine/
+.tabnine-cache/
+.continue/
+.aider/
+.codeium/
+.amper/
+.jetbrains/
+.gemini/
+.antigravity/
+.opencode/
+.cody/
+.blackbox/
+.pickle/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+nul
+NUL
+
+# Ruff
+.ruff_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Docker volumes
+postgres_data/
+minio_data/
+redpanda_data/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Doppler (secrets managed externally)
+.doppler/
+
+# Temporary exclusions until documentation/agent files are standardized
+docs/
+CLAUDE.md
+claude.md
+STATUS.md
+status.md
+SESSION_HANDOFF.md
