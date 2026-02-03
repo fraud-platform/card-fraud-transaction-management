@@ -1,25 +1,31 @@
 # Code Map
 
-## Core Layout
+## Repository Purpose
 
-- `app/`: FastAPI service implementation.
-  - `api/routes/`: endpoint handlers.
-  - `schemas/`: API contracts.
-  - `services/`: business orchestration.
-  - `persistence/`: repository/data access layer.
-  - `ingestion/`: Kafka consumer and ingestion flow.
-- `cli/`: `uv run` entrypoints.
-- `scripts/`: setup, verification, and local utilities.
-- `db/`: SQL and migration-related artifacts.
-- `tests/`: unit, smoke, and integration suites.
+FastAPI service for decision-event ingestion, transaction query, and analyst workflows.
 
-## Key Commands
+## Primary Areas
 
+- `app/` or `src/`: service or application implementation.
+- `tests/` or `e2e/`: automated validation.
+- `scripts/` or `cli/`: local developer tooling.
+- `docs/`: curated documentation index and section guides.
+
+## Local Commands
+
+- `uv sync`
 - `uv run doppler-local`
 - `uv run doppler-local-test`
+
+## Test Commands
+
+- `uv run doppler-local-test`
 - `uv run doppler-test`
-- `uv run db-init`
 
-## Integration Role
+## API Note
 
-Consumes decision events and serves analyst-facing transaction/review APIs.
+Primary API surface is FastAPI under `/api/v1/*`.
+
+## Deployment Note
+
+Local deployment can run standalone or via platform compose apps profile.
