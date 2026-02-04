@@ -98,4 +98,4 @@ uv run auth0-verify
 
 - `AGENTS.md`
 - `docs/README.md`
-- `docs/openapi.json`
+- `docs/03-api/openapi.json`

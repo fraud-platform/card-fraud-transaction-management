@@ -21,7 +21,7 @@ Use this file first. Keep `CLAUDE.md` as a pointer to this file only.
 
 - Treat this file as source of truth for commands, architecture guardrails, and safety rules.
 - Prefer updating docs to match implementation. If docs are correct and code is wrong, fix code.
-- Do not remove historical information; archive it under `docs/archive/`.
+- Remove stale documentation rather than keeping duplicate historical copies.
 - Use ASCII when editing docs unless there is a strong reason not to.
 
 ## Core Rules
@@ -130,7 +130,7 @@ Base path: `/api/v1`
 - Bulk: assign/status/create-case
 - Health: `/api/v1/health`, `/ready`, `/live`
 
-Use `docs/openapi.json` as the API contract artifact.
+Use `docs/03-api/openapi.json` as the API contract artifact.
 
 ## Architecture Guardrails
 
@@ -204,11 +204,11 @@ uv run auth0-bootstrap --yes --verbose
 
 - `README.md`: human-friendly project overview
 - `DEVELOPER_GUIDE.md`: command reference
-- `docs/README.md`: docs index and archive map
-- `docs/openapi.json`: generated API schema
+- `docs/README.md`: docs index
+- `docs/03-api/openapi.json`: generated API schema
 - `docs/01-setup/`: environment setup docs
-- `docs/runbooks/`: operational runbooks
-- `docs/archive/`: historical docs (do not delete; archive instead)
+- `docs/06-operations/`: operational runbooks
+- `docs/07-reference/`: ADRs and cross-repo references
 
 ## Common Problems
 
@@ -224,4 +224,4 @@ When implementation changes:
 1. Update `AGENTS.md` if commands/contracts changed.
 2. Regenerate OpenAPI (`uv run openapi`) if API changed.
 3. Update `README.md`, `DEVELOPER_GUIDE.md`, and `docs/README.md` links.
-4. Archive superseded docs under `docs/archive/` instead of deleting content.
+4. Remove superseded docs and keep only the current, canonical documents.

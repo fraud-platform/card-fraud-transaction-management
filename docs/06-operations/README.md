@@ -1,12 +1,18 @@
 # Operations
 
-Runbooks, troubleshooting, security operations, and observability.
+Runbooks, observability, troubleshooting, and security operations.
 
 ## Published Files
 
-- _No published topic file yet._
+- `dlq-triage.md`
+- `error-and-dlq-model.md`
+- `observability.md`
+- `replay-backfill.md`
+- `retention-and-archival.md`
+- `runbook-readme.md`
+- `security-and-data-governance.md`
 
 ## Naming Rules
 
 - Use lowercase kebab-case for new topic docs.
-- Keep this section focused; move broad cross-cutting topics to `07-reference`.
+- Keep each section focused on the section purpose.

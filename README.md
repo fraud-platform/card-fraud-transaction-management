@@ -53,7 +53,7 @@ uv run openapi
 
 `/api/v1`
 
-For full endpoint details, use `docs/openapi.json`.
+For full endpoint details, use `docs/03-api/openapi.json`.
 
 ## Documentation
 
@@ -61,7 +61,7 @@ For full endpoint details, use `docs/openapi.json`.
 - `DEVELOPER_GUIDE.md` - command reference
 - `docs/README.md` - documentation index and archive map
 - `docs/01-setup/` - setup guides
-- `docs/runbooks/` - operations runbooks
+- `docs/06-operations/` - operations runbooks
 
 ## Security and Compliance
 

@@ -1,12 +1,12 @@
 # Deployment
 
-Local runtime/deployment patterns and release readiness notes.
+Local runtime/deployment patterns and release-readiness guidance.
 
 ## Published Files
 
-- _No published topic file yet._
+- `deployment-and-config.md`
 
 ## Naming Rules
 
 - Use lowercase kebab-case for new topic docs.
-- Keep this section focused; move broad cross-cutting topics to `07-reference`.
+- Keep each section focused on the section purpose.

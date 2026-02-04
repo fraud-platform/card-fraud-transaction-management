@@ -1,12 +1,12 @@
 # Testing
 
-Test strategy, local commands, and validation checklists.
+Test strategy, local commands, and validation playbooks.
 
 ## Published Files
 
-- _No published topic file yet._
+- `testing-strategy.md`
 
 ## Naming Rules
 
 - Use lowercase kebab-case for new topic docs.
-- Keep this section focused; move broad cross-cutting topics to `07-reference`.
+- Keep each section focused on the section purpose.

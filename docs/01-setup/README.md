@@ -5,6 +5,7 @@ Prerequisites, first-run onboarding, and environment bootstrap.
 ## Published Files
 
 - `auth0-setup-guide.md`
+- `configuration.md`
 - `database-setup.md`
 - `doppler-secrets-setup.md`
 - `kafka-setup.md`
@@ -12,4 +13,4 @@ Prerequisites, first-run onboarding, and environment bootstrap.
 ## Naming Rules
 
 - Use lowercase kebab-case for new topic docs.
-- Keep this section focused; move broad cross-cutting topics to `07-reference`.
+- Keep each section focused on the section purpose.

@@ -2,11 +2,6 @@
 
 FastAPI service for decision-event ingestion, transaction query, and analyst workflows.
 
-## Audience
-
-- New developers setting up this repository locally.
-- Coding agents that need deterministic, executable setup/test instructions.
-
 ## Quick Start
 
 ```powershell
@@ -18,9 +13,9 @@ uv run doppler-local-test
 ## Documentation Standards
 
 - Keep published docs inside `docs/01-setup` through `docs/07-reference`.
-- Use lowercase kebab-case file names (for example `local-setup.md`).
-- Exceptions: `README.md`, `codemap.md`, and machine-generated contract files (for example `openapi.json`).
-- Do not publish TODO, session notes, or archive artifacts.
+- Use lowercase kebab-case file names for topic docs.
+- Exceptions: `README.md`, `codemap.md`, and generated contract artifacts (for example `openapi.json`).
+- Do not keep TODO/archive/status/session planning docs in tracked documentation.
 
 ## Section Index
 
@@ -29,47 +24,73 @@ uv run doppler-local-test
 Prerequisites, first-run onboarding, and environment bootstrap.
 
 - `01-setup/auth0-setup-guide.md`
+- `01-setup/configuration.md`
 - `01-setup/database-setup.md`
 - `01-setup/doppler-secrets-setup.md`
 - `01-setup/kafka-setup.md`
 
 ### `02-development` - Development
 
-Day-to-day workflows, coding conventions, and contributor practices.
+Day-to-day workflows, architecture notes, and contributor practices.
 
-- _No published topic file yet; see section README._
+- `02-development/architecture.md`
+- `02-development/domain-and-contracts.md`
+- `02-development/idempotency-and-replay.md`
+- `02-development/storage-and-migrations.md`
 
 ### `03-api` - API
 
-Contracts, schemas, endpoint examples, and integration notes.
+Contracts, schemas, endpoint references, and integration notes.
 
-- _No published topic file yet; see section README._
+- `03-api/decision-event-schema-v1.md`
+- `03-api/../03-api/decision-event.schema.v1.json`
+- `03-api/ingestion.md`
+- `03-api/openapi-outline.md`
+- `03-api/openapi.json`
+- `03-api/query-api.md`
+- `03-api/ui-integration.md`
 
 ### `04-testing` - Testing
 
-Test strategy, local commands, and validation checklists.
+Test strategy, local commands, and validation playbooks.
 
-- _No published topic file yet; see section README._
+- `04-testing/testing-strategy.md`
 
 ### `05-deployment` - Deployment
 
-Local runtime/deployment patterns and release readiness notes.
+Local runtime/deployment patterns and release-readiness guidance.
 
-- _No published topic file yet; see section README._
+- `05-deployment/deployment-and-config.md`
 
 ### `06-operations` - Operations
 
-Runbooks, troubleshooting, security operations, and observability.
+Runbooks, observability, troubleshooting, and security operations.
 
-- _No published topic file yet; see section README._
+- `06-operations/dlq-triage.md`
+- `06-operations/error-and-dlq-model.md`
+- `06-operations/observability.md`
+- `06-operations/replay-backfill.md`
+- `06-operations/retention-and-archival.md`
+- `06-operations/runbook-readme.md`
+- `06-operations/security-and-data-governance.md`
 
 ### `07-reference` - Reference
 
-Architecture decisions, glossary, and cross-repo references.
+ADRs, glossary, and cross-repo reference material.
 
-- _No published topic file yet; see section README._
+- `07-reference/0000-use-adr.md`
+- `07-reference/0001-async-sqlalchemy.md`
+- `07-reference/0002-composite-idempotency-key.md`
+- `07-reference/0003-separate-review-layer.md`
+- `07-reference/0004-evaluation-types.md`
+- `07-reference/0005-uuidv7-for-ids.md`
+- `07-reference/0006-kafka-dlz-pattern.md`
+- `07-reference/0007-ruleset-metadata.md`
+- `07-reference/0008-token-only-card-mode.md`
+- `07-reference/auth-model.md`
+- `07-reference/fraud-analyst-workflow.md`
 
 ## Core Index Files
 
-- `docs/README.md` (this index)
-- `docs/codemap.md` (developer/agent orientation map)
+- `docs/README.md`
+- `docs/codemap.md`

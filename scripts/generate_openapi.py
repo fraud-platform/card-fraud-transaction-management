@@ -1,7 +1,7 @@
 """Generate OpenAPI specification from FastAPI app.
 
 Usage:
-    python scripts/dump_openapi.py [--output docs/openapi.json]
+    python scripts/dump_openapi.py [--output docs/03-api/openapi.json]
 
 This script generates the OpenAPI 3.1 specification for the Card Fraud Transaction
 Management API and writes it to the specified output path.
@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app.main import create_app
 
 
-def generate_openapi(output_path: str = "docs/openapi.json") -> dict:
+def generate_openapi(output_path: str = "docs/03-api/openapi.json") -> dict:
     """Generate and save OpenAPI specification."""
     app = create_app()
     openapi_spec = app.openapi()
@@ -38,5 +38,5 @@ def generate_openapi(output_path: str = "docs/openapi.json") -> dict:
 
 
 if __name__ == "__main__":
-    output = sys.argv[1] if len(sys.argv) > 1 else "docs/openapi.json"
+    output = sys.argv[1] if len(sys.argv) > 1 else "docs/03-api/openapi.json"
     generate_openapi(output)
