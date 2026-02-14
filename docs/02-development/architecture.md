@@ -8,7 +8,7 @@ Build a downstream **transaction persistence and management** service that consu
 - No additional database tables in v1 beyond `transactions` and `transaction_rule_matches`.
 
 ## Context / position
-Upstream: `card-fraud-rule-engine` emits decision events.
+Upstream: `card-fraud-rule-engine-auth/card-fraud-rule-engine-monitoring` emits decision events.
 Downstream: analyst portal / reporting tools query this service.
 
 ## Proposed logical components
@@ -64,3 +64,4 @@ Remaining decisions:
 - Define environment variables and configuration conventions.
 - Define “MVP query API” endpoints used by portal.
 - Define SLOs (ingestion latency, API p95).
+

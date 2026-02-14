@@ -633,7 +633,7 @@ CREATE TABLE IF NOT EXISTS fraud_gov.alerts (
 
 ---
 
-## Project 2: card-fraud-rule-engine
+## Project 2: card-fraud-rule-engine-auth/card-fraud-rule-engine-monitoring
 
 ### Phase 1: Enhanced Decision Event
 
@@ -1054,7 +1054,7 @@ src/components/charts/
 - [ ] Implement case endpoints
 - [ ] Update transaction query with review status
 
-**card-fraud-rule-engine:**
+**card-fraud-rule-engine-auth/card-fraud-rule-engine-monitoring:**
 - [ ] Add transactionContext to decision event
 - [ ] Add velocitySnapshot to decision event
 - [ ] Add conditionsMet/conditionValues to matched rules
@@ -1185,3 +1185,4 @@ New permissions needed:
 ---
 
 **End of Plan**
+
