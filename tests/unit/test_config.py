@@ -48,6 +48,33 @@ class TestConfig:
         url = config.async_url
         assert "postgresql+asyncpg://testuser:testpass@localhost:5432/testdb" == url
 
+    def test_database_url_strips_engine_query_options(self):
+        """Engine-only options in DATABASE_URL must not be passed to asyncpg connect()."""
+        config = DatabaseConfig(
+            url_app=(
+                "postgresql://testuser:testpass@localhost:5432/testdb"
+                "?pool_size=20&max_overflow=10&sslmode=require"
+            )
+        )
+        url = config.async_url
+        assert url.startswith("postgresql+asyncpg://")
+        assert "pool_size=" not in url
+        assert "max_overflow=" not in url
+        assert "sslmode=require" in url
+
+    def test_database_sync_url_strips_engine_query_options(self):
+        """Sync URL should also drop engine-only query options."""
+        config = DatabaseConfig(
+            url_app=(
+                "postgresql+asyncpg://testuser:testpass@localhost:5432/testdb"
+                "?pool_size=20&pool_recycle=1800"
+            )
+        )
+        url = config.sync_url
+        assert url.startswith("postgresql+psycopg://")
+        assert "pool_size=" not in url
+        assert "pool_recycle=" not in url
+
     def test_kafka_config_defaults(self):
         """Test KafkaConfig has correct defaults."""
         config = KafkaConfig()

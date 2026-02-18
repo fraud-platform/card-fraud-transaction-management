@@ -33,10 +33,10 @@ def create_async_engine(config: DatabaseConfig) -> AsyncEngine:
         pool_timeout=config.pool_timeout,
         pool_recycle=config.pool_recycle,
         pool_pre_ping=True,
-        # For asyncpg, ensure connections are properly reset
+        # For asyncpg, set server timezone (timeout parameter removed as it causes
+        # Windows proactor event loop issues during connection pool cleanup)
         connect_args={
             "server_settings": {"timezone": "UTC"},
-            "timeout": 30,
         },
     )
     logger.info(

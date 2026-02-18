@@ -62,9 +62,12 @@ def _run_compose(
     """Run docker compose for services."""
     service_args = services.split() if isinstance(services, str) else services
     cmd = [
-        "docker", "compose",
-        "-f", _COMPOSE_FILE,
-        "-p", PROJECT_PREFIX,
+        "docker",
+        "compose",
+        "-f",
+        _COMPOSE_FILE,
+        "-p",
+        PROJECT_PREFIX,
         action,
     ]
     if detached:
@@ -177,7 +180,7 @@ def infra_up() -> None:
     result = _run_compose(
         ["postgres", "minio", "minio-init", "redis", "redpanda", "redpanda-console"],
         "up",
-        volumes=False
+        volumes=False,
     )
     sys.exit(result)
 

@@ -14,7 +14,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -156,6 +156,9 @@ def setup_telemetry(app: FastAPI, settings: Settings) -> None:
     if not settings.observability.otlp_endpoint:
         return
 
+    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+    from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
     resource = Resource(
         attributes={
             SERVICE_NAME: settings.observability.service_name,
@@ -165,12 +168,13 @@ def setup_telemetry(app: FastAPI, settings: Settings) -> None:
     provider = TracerProvider(resource=resource)
     exporter = OTLPSpanExporter(
         endpoint=settings.observability.otlp_endpoint,
-        insecure=settings.observability.otlp_insecure,
     )
     provider.add_span_processor(BatchSpanProcessor(exporter))
     trace.set_tracer_provider(provider)
 
     FastAPIInstrumentor.instrument_app(app)
+    SQLAlchemyInstrumentor().instrument()
+    HTTPXClientInstrumentor().instrument()
 
 
 def run() -> None:

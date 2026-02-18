@@ -18,6 +18,9 @@ os.environ.setdefault("AUTH0_DOMAIN", "test.local")
 os.environ.setdefault("AUTH0_AUDIENCE", "test-audience")
 os.environ.setdefault("AUTH0_ALGORITHMS", "RS256")
 os.environ.setdefault("FEATURE_ENABLE_AUTO_REVIEW_CREATION", "false")
+# Ensure JWT validation is enforced for integration tests
+# This overrides the local development bypass setting
+os.environ["SECURITY_SKIP_JWT_VALIDATION"] = "false"
 
 
 import pytest

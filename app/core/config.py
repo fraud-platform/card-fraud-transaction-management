@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from enum import Enum
 from functools import lru_cache
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,6 +17,33 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 POSTGRESQL_PREFIX = "postgresql://"
 ASYNCPG_DRIVER = "+asyncpg"
 PSYCPG_DRIVER = "+psycopg"
+ENGINE_OPTION_QUERY_KEYS = frozenset({"pool_size", "max_overflow", "pool_timeout", "pool_recycle"})
+
+
+def _strip_engine_query_params(url: str) -> str:
+    """Strip SQLAlchemy engine-only options from DSN query string."""
+    if "?" not in url:
+        return url
+
+    parsed = urlsplit(url)
+    if not parsed.query:
+        return url
+
+    filtered_query = [
+        (key, value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+        if key.lower() not in ENGINE_OPTION_QUERY_KEYS
+    ]
+
+    return urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path,
+            urlencode(filtered_query, doseq=True),
+            parsed.fragment,
+        )
+    )
 
 
 class AppEnvironment(str, Enum):
@@ -101,7 +129,7 @@ class DatabaseConfig(BaseSettings):
             if url.startswith(POSTGRESQL_PREFIX) and ASYNCPG_DRIVER not in url:
                 new_prefix = POSTGRESQL_PREFIX.removesuffix("://") + ASYNCPG_DRIVER + "://"
                 url = url.replace(POSTGRESQL_PREFIX, new_prefix, 1)
-            return url
+            return _strip_engine_query_params(url)
         # Fallback to individual components
         password = self.password.get_secret_value()
         return f"postgresql{ASYNCPG_DRIVER}://{self.user}:{password}@{self.host}:{self.port}/{self.name}"
@@ -116,7 +144,7 @@ class DatabaseConfig(BaseSettings):
                 url = url.replace(ASYNCPG_DRIVER, PSYCPG_DRIVER, 1)
             elif "+psycopg" not in url:
                 url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-            return url
+            return _strip_engine_query_params(url)
         # Fallback to individual components
         password = self.password.get_secret_value()
         return f"postgresql+psycopg://{self.user}:{password}@{self.host}:{self.port}/{self.name}"
@@ -258,6 +286,7 @@ class Settings(BaseSettings):
     observability: ObservabilityConfig = Field(default_factory=ObservabilityConfig)
     features: FeatureFlagsConfig = Field(default_factory=FeatureFlagsConfig)
     security: SecurityConfig = Field(default_factory=SecurityConfig)
+    metrics_token: str | None = Field(default=None)
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> Settings:

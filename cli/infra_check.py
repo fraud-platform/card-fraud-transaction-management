@@ -141,8 +141,7 @@ def check() -> None:
     # Count running containers
     running_count = sum(1 for v in status.values() if v["running"])
     required_running = sum(
-        1 for name, _, _ in REQUIRED_FOR_TXN_MGMT
-        if status.get(name, {}).get("running", False)
+        1 for name, _, _ in REQUIRED_FOR_TXN_MGMT if status.get(name, {}).get("running", False)
     )
 
     print()
