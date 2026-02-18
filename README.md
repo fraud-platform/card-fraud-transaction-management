@@ -69,3 +69,4 @@ For full endpoint details, use `docs/03-api/openapi.json`.
 - No raw PAN storage
 - Tokenized card identifiers only
 - Local-only JWT bypass guarded by config validation
+- `/metrics` requires `X-Metrics-Token` (`METRICS_TOKEN` must be configured)

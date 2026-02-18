@@ -19,6 +19,7 @@ FastAPI service for decision-event ingestion, transaction query, and analyst wor
 - `uv sync`
 - `uv run doppler-local`
 - `uv run doppler-local-test`
+- `curl -H "X-Metrics-Token: $METRICS_TOKEN" http://localhost:8002/metrics`
 
 ## Platform Modes
 

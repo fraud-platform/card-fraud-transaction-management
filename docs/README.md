@@ -66,6 +66,8 @@ Local runtime/deployment patterns and release-readiness guidance.
 
 Runbooks, observability, troubleshooting, and security operations.
 
+Prometheus scraping endpoint: `/metrics` (requires `X-Metrics-Token`).
+
 - `06-operations/dlq-triage.md`
 - `06-operations/error-and-dlq-model.md`
 - `06-operations/observability.md`

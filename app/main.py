@@ -24,6 +24,7 @@ from app.api.routes.bulk import router as bulk_router
 from app.api.routes.cases import router as cases_router
 from app.api.routes.decision_events import router as decision_events_router
 from app.api.routes.health import router as health_router
+from app.api.routes.monitoring import router as monitoring_router
 from app.api.routes.notes import router as notes_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.worklist import router as worklist_router
@@ -32,6 +33,7 @@ from app.core.config import AppEnvironment, Settings, get_settings
 from app.core.database import create_async_engine, create_session_factory
 from app.core.errors import TransactionManagementError, get_status_code
 from app.core.logging import setup_logging
+from app.core.observability import ObservabilityMiddleware
 from app.ingestion.kafka_consumer import start_kafka_consumer, stop_kafka_consumer
 
 logger = logging.getLogger(__name__)
@@ -103,6 +105,10 @@ def create_app() -> FastAPI:
         allow_headers=settings.security.cors_allow_headers,
     )
 
+    app.add_middleware(ObservabilityMiddleware)
+
+    # Monitoring routes (no prefix - metrics at /metrics, health at /api/v1/...)
+    app.include_router(monitoring_router)
     app.include_router(health_router, prefix=API_V1_PREFIX)
     app.include_router(decision_events_router, prefix=API_V1_PREFIX)
     app.include_router(reviews_router, prefix=API_V1_PREFIX)

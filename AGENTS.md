@@ -122,7 +122,7 @@ Base path: `/api/v1`
 - Ingestion: `POST /decision-events`
 - Transactions: `GET /transactions`, `GET /transactions/{transaction_id}`
 - Combined views: `GET /transactions/{transaction_id}/combined`, `GET /transactions/{transaction_id}/overview`
-- Metrics: `GET /metrics`
+- Metrics: `GET /metrics` (requires `X-Metrics-Token`)
 - Reviews: `GET/POST /transactions/{transaction_id}/review`, plus status/assign/resolve/escalate
 - Notes: `GET/POST /transactions/{transaction_id}/notes`, plus get/update/delete note
 - Cases: list/create/get/update, case transactions, activity, resolve
