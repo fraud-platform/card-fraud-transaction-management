@@ -31,6 +31,7 @@ FOREIGN KEY REFERENCE PATTERN:
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from json import dumps
 from typing import Any
 from uuid import UUID
 
@@ -92,6 +93,13 @@ class TransactionRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    @staticmethod
+    def _to_jsonb_param(value: Any) -> Any:
+        """Serialize JSON-like values for JSONB parameters in text() queries."""
+        if isinstance(value, (dict, list)):
+            return dumps(value)
+        return value
+
     async def get_by_transaction_id(
         self, transaction_id: UUID, evaluation_type: str | None = None
     ) -> dict[str, Any] | None:
@@ -133,6 +141,9 @@ class TransactionRepository:
     async def list(
         self,
         card_id: str | None = None,
+        ip_address: str | None = None,
+        device_id: str | None = None,
+        device_fingerprint_hash: str | None = None,
         decision: str | None = None,
         merchant_id: str | None = None,
         from_date: datetime | None = None,
@@ -178,6 +189,20 @@ class TransactionRepository:
         if card_id:
             conditions.append("t.card_id = :card_id")
             params["card_id"] = card_id
+
+        if ip_address:
+            conditions.append("(t.transaction_context ->> 'ip_address') = :ip_address")
+            params["ip_address"] = ip_address
+
+        if device_id:
+            conditions.append("(t.transaction_context #>> '{device,device_id}') = :device_id")
+            params["device_id"] = device_id
+
+        if device_fingerprint_hash:
+            conditions.append(
+                "(t.transaction_context #>> '{device,device_fingerprint_hash}') = :device_fingerprint_hash"  # noqa: E501
+            )
+            params["device_fingerprint_hash"] = device_fingerprint_hash
 
         if decision:
             conditions.append("t.decision = :decision")
@@ -373,10 +398,18 @@ class TransactionRepository:
                 "ruleset_id": transaction_data.get("ruleset_id"),
                 "ruleset_version": transaction_data.get("ruleset_version"),
                 "risk_level": transaction_data.get("risk_level"),
-                "transaction_context": transaction_data.get("transaction_context"),
-                "velocity_snapshot": transaction_data.get("velocity_snapshot"),
-                "velocity_results": transaction_data.get("velocity_results"),
-                "engine_metadata": transaction_data.get("engine_metadata"),
+                "transaction_context": self._to_jsonb_param(
+                    transaction_data.get("transaction_context")
+                ),
+                "velocity_snapshot": self._to_jsonb_param(
+                    transaction_data.get("velocity_snapshot")
+                ),
+                "velocity_results": self._to_jsonb_param(
+                    transaction_data.get("velocity_results")
+                ),
+                "engine_metadata": self._to_jsonb_param(
+                    transaction_data.get("engine_metadata")
+                ),
                 "transaction_timestamp": transaction_data["occurred_at"],
                 "ingestion_timestamp": datetime.utcnow(),
                 "kafka_topic": transaction_data.get("kafka_topic"),
@@ -386,7 +419,7 @@ class TransactionRepository:
                 "trace_id": transaction_data.get("trace_id"),
                 "request_id": transaction_data.get("request_id"),
                 "session_id": transaction_data.get("session_id"),
-                "raw_payload": transaction_data.get("raw_payload"),
+                "raw_payload": self._to_jsonb_param(transaction_data.get("raw_payload")),
                 "ingestion_source": transaction_data.get("ingestion_source", "HTTP"),
             },
         )

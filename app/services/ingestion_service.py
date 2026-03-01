@@ -47,6 +47,11 @@ class IngestionService:
         except (ValueError, AttributeError):
             txn_id = uuid7()
 
+        transaction_context = dict(event.transaction_context) if event.transaction_context else {}
+        ip_address = event.transaction.ip_address.strip() if event.transaction.ip_address else None
+        if ip_address and "ip_address" not in transaction_context:
+            transaction_context["ip_address"] = ip_address
+
         transaction_data = {
             "transaction_id": txn_id,
             "evaluation_type": event.evaluation_type.value,
@@ -71,7 +76,7 @@ class IngestionService:
             "ruleset_version": event.ruleset_version,
             # Enhanced fields for analyst workflow
             "risk_level": event.risk_level.value if event.risk_level else None,
-            "transaction_context": event.transaction_context,
+            "transaction_context": transaction_context or None,
             "velocity_snapshot": event.velocity_snapshot,
             "velocity_results": event.velocity_results,
             "engine_metadata": event.engine_metadata,

@@ -42,6 +42,8 @@ Day-to-day workflows, architecture notes, and contributor practices.
 
 Contracts, schemas, endpoint references, and integration notes.
 
+Transaction list API (`GET /api/v1/transactions`) supports neighborhood filters via query params: `ip_address`, `device_id`, and `device_fingerprint_hash`.
+
 - `03-api/decision-event-schema-v1.md`
 - `03-api/../03-api/decision-event.schema.v1.json`
 - `03-api/ingestion.md`

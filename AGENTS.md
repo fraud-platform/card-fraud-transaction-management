@@ -121,6 +121,14 @@ Base path: `/api/v1`
 
 - Ingestion: `POST /decision-events`
 - Transactions: `GET /transactions`, `GET /transactions/{transaction_id}`
+   - `GET /transactions` supports provider-side filters for neighborhood lookups:
+      `ip_address`, `device_id`, `device_fingerprint_hash`
+   - Watch-outs:
+      - `device_id` and `device_fingerprint_hash` filters match only when upstream populates
+         `transaction_context.device.device_id` and
+         `transaction_context.device.device_fingerprint_hash`.
+      - Ingestion persists `transaction.ip_address` into `transaction_context.ip_address`
+         only when that key is not already present.
 - Combined views: `GET /transactions/{transaction_id}/combined`, `GET /transactions/{transaction_id}/overview`
 - Metrics: `GET /metrics` (requires `X-Metrics-Token`)
 - Reviews: `GET/POST /transactions/{transaction_id}/review`, plus status/assign/resolve/escalate

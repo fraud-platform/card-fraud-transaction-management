@@ -103,6 +103,11 @@ async def list_transactions(
     current_user: CurrentUser,
     page_size: int = Query(50, ge=1, le=500, description="Items per page"),
     card_id: str | None = Query(None, description="Filter by card ID"),
+    ip_address: str | None = Query(None, description="Filter by IP address"),
+    device_id: str | None = Query(None, description="Filter by device ID"),
+    device_fingerprint_hash: str | None = Query(
+        None, description="Filter by device fingerprint hash"
+    ),
     decision: str | None = Query(None, description="Filter by decision (APPROVE/DECLINE)"),
     country: str | None = Query(None, description="Filter by country code (not persisted)"),
     merchant_id: str | None = Query(None, description="Filter by merchant ID"),
@@ -130,6 +135,9 @@ async def list_transactions(
     result = await service.list_transactions(
         page_size=page_size,
         card_id=card_id,
+        ip_address=ip_address,
+        device_id=device_id,
+        device_fingerprint_hash=device_fingerprint_hash,
         decision=decision,
         country=country,
         merchant_id=merchant_id,

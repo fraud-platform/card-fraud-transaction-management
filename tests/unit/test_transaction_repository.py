@@ -502,6 +502,35 @@ class TestTransactionRepositoryAsyncBehavior:
         assert len(calls) == 2
 
     @pytest.mark.asyncio
+    async def test_list_with_ip_and_device_filters(self):
+        """Test list passes ip/device neighborhood filters as query params."""
+        mock_session = MagicMock()
+        repo = TransactionRepository(mock_session)
+
+        mock_count_result = MagicMock()
+        mock_count_result.scalar = MagicMock(return_value=0)
+
+        mock_list_result = MagicMock()
+        mock_list_result.fetchall = MagicMock(return_value=[])
+
+        mock_session.execute = AsyncMock(side_effect=[mock_count_result, mock_list_result])
+
+        await repo.list(
+            ip_address="203.0.113.10",
+            device_id="device_abc123",
+            device_fingerprint_hash="fp_hash_123",
+            limit=10,
+        )
+
+        calls = mock_session.execute.call_args_list
+        assert len(calls) == 2
+
+        first_call_params = calls[0].args[1]
+        assert first_call_params["ip_address"] == "203.0.113.10"
+        assert first_call_params["device_id"] == "device_abc123"
+        assert first_call_params["device_fingerprint_hash"] == "fp_hash_123"
+
+    @pytest.mark.asyncio
     async def test_upsert_transaction_inserts_new(self):
         """Test upsert_transaction inserts new transaction."""
         mock_session = MagicMock()
@@ -527,6 +556,52 @@ class TestTransactionRepositoryAsyncBehavior:
 
         assert result is not None
         mock_session.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_upsert_transaction_serializes_jsonb_payloads(self):
+        """Test upsert_transaction serializes JSONB payloads for SQL text parameters."""
+        mock_session = MagicMock()
+        repo = TransactionRepository(mock_session)
+
+        transaction_data = {
+            "transaction_id": uuid7(),
+            "occurred_at": datetime.now(),
+            "card_id": "tok_card123",
+            "amount": 100.00,
+            "currency": "USD",
+            "decision": "APPROVE",
+            "decision_reason": "DEFAULT_ALLOW",
+            "transaction_context": {"device": {"device_id": "device_1"}},
+            "velocity_snapshot": {"card_1h": 2},
+            "velocity_results": {"rule_1": {"result": "ok"}},
+            "engine_metadata": {"engine_mode": "rule"},
+            "raw_payload": {"source": "unit-test"},
+        }
+
+        mock_result = MagicMock()
+        mock_result.fetchone = MagicMock(return_value=[transaction_data["transaction_id"]])
+        mock_session.execute = AsyncMock(return_value=mock_result)
+
+        repo.get_by_transaction_id = AsyncMock(return_value=transaction_data)
+
+        await repo.upsert_transaction(transaction_data)
+
+        execute_params = mock_session.execute.call_args.args[1]
+        assert execute_params["transaction_context"] == '{"device": {"device_id": "device_1"}}'
+        assert execute_params["velocity_snapshot"] == '{"card_1h": 2}'
+        assert execute_params["velocity_results"] == '{"rule_1": {"result": "ok"}}'
+        assert execute_params["engine_metadata"] == '{"engine_mode": "rule"}'
+        assert execute_params["raw_payload"] == '{"source": "unit-test"}'
+
+    def test_to_jsonb_param_serializes_dict_and_list(self):
+        """Test JSON-like values are serialized for JSONB parameters."""
+        mock_session = MagicMock()
+        repo = TransactionRepository(mock_session)
+
+        assert repo._to_jsonb_param({"a": 1}) == '{"a": 1}'
+        assert repo._to_jsonb_param([1, 2, 3]) == "[1, 2, 3]"
+        assert repo._to_jsonb_param(None) is None
+        assert repo._to_jsonb_param("plain") == "plain"
 
     @pytest.mark.asyncio
     async def test_add_rule_match_executes_query(self):

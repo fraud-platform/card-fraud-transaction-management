@@ -54,6 +54,19 @@ class TestTransactionRepositorySQL:
             "Cursor should use last_txn['id'] (PK), not last_txn['transaction_id'] (business key)"
         )
 
+    def test_list_sql_has_jsonb_neighborhood_filters(self):
+        """Verify list SQL includes JSONB filters for IP/device neighborhood lookups."""
+        import inspect
+
+        source = inspect.getsource(TransactionRepository.list)
+
+        assert "(t.transaction_context ->> 'ip_address') = :ip_address" in source
+        assert "(t.transaction_context #>> '{device,device_id}') = :device_id" in source
+        assert (
+            "(t.transaction_context #>> '{device,device_fingerprint_hash}') = "
+            ":device_fingerprint_hash" in source
+        )
+
 
 class TestReviewRepositorySQL:
     """Test SQL queries in ReviewRepository match documented patterns."""

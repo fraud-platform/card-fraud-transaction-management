@@ -107,6 +107,9 @@ class TransactionService:
         self,
         page_size: int = 50,
         card_id: str | None = None,
+        ip_address: str | None = None,
+        device_id: str | None = None,
+        device_fingerprint_hash: str | None = None,
         decision: str | None = None,
         country: str
         | None = None,  # Not persisted in DB (lean table), accepted for API compatibility
@@ -134,6 +137,9 @@ class TransactionService:
         """
         transactions, next_cursor, total = await self.repository.list(
             card_id=card_id,
+            ip_address=ip_address,
+            device_id=device_id,
+            device_fingerprint_hash=device_fingerprint_hash,
             decision=decision,
             merchant_id=merchant_id,
             from_date=from_date,

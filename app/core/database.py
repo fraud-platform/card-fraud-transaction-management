@@ -2,6 +2,8 @@
 
 import logging
 from collections.abc import AsyncGenerator
+from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -23,10 +25,49 @@ _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
 
 
+def _normalize_asyncpg_runtime_url(url: str) -> tuple[str, bool | None]:
+    """Strip unsupported asyncpg query params and map sslmode to asyncpg ssl arg."""
+    split = urlsplit(url)
+    ssl_mode: str | None = None
+    filtered: list[tuple[str, str]] = []
+    for key, value in parse_qsl(split.query, keep_blank_values=True):
+        if key.lower() == "sslmode":
+            ssl_mode = value
+            continue
+        filtered.append((key, value))
+
+    normalized_url = urlunsplit(
+        (
+            split.scheme,
+            split.netloc,
+            split.path,
+            urlencode(filtered, doseq=True),
+            split.fragment,
+        )
+    )
+
+    ssl_enabled: bool | None = None
+    if isinstance(ssl_mode, str):
+        mode = ssl_mode.strip().lower()
+        if mode in {"require", "verify-ca", "verify-full"}:
+            ssl_enabled = True
+        elif mode in {"disable", "allow", "prefer"}:
+            ssl_enabled = False
+
+    return normalized_url, ssl_enabled
+
+
 def create_async_engine(config: DatabaseConfig) -> AsyncEngine:
     """Create async database engine."""
+    runtime_url, ssl_enabled = _normalize_asyncpg_runtime_url(config.async_url)
+    connect_args: dict[str, Any] = {
+        "server_settings": {"timezone": "UTC"},
+    }
+    if ssl_enabled is not None:
+        connect_args["ssl"] = ssl_enabled
+
     engine = sqlalchemy_create_async_engine(
-        config.async_url,
+        runtime_url,
         echo=config.echo,
         pool_size=config.pool_size,
         max_overflow=config.max_overflow,
@@ -35,9 +76,7 @@ def create_async_engine(config: DatabaseConfig) -> AsyncEngine:
         pool_pre_ping=True,
         # For asyncpg, set server timezone (timeout parameter removed as it causes
         # Windows proactor event loop issues during connection pool cleanup)
-        connect_args={
-            "server_settings": {"timezone": "UTC"},
-        },
+        connect_args=connect_args,
     )
     logger.info(
         "Database engine created",

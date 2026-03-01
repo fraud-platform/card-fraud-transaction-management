@@ -137,6 +137,79 @@ class TestTransactionQueriesIntegration:
             )
             assert response.status_code == 200
 
+    async def test_list_transactions_filter_by_ip_and_device_context(self, client_app):
+        """Test listing transactions filtered by transaction_context IP and device fields."""
+        transaction_id = str(uuid7())
+        ip_address = "203.0.113.10"
+        device_id = f"device_{uuid7().hex[:10]}"
+        device_fingerprint_hash = f"fp_{uuid7().hex}"
+
+        transport = httpx.ASGITransport(app=client_app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            ingest_response = await client.post(
+                "/api/v1/decision-events",
+                json={
+                    "transaction_id": transaction_id,
+                    "occurred_at": datetime.utcnow().isoformat() + "Z",
+                    "produced_at": datetime.utcnow().isoformat() + "Z",
+                    "evaluation_type": "AUTH",
+                    "transaction": {
+                        "card_id": "tok_visa_test_ip_device",
+                        "card_last4": "1234",
+                        "card_network": "VISA",
+                        "amount": "150.00",
+                        "currency": "USD",
+                        "country": "US",
+                        "merchant_id": "merchant_ip_device_001",
+                        "mcc": "5411",
+                        "ip_address": ip_address,
+                    },
+                    "transaction_context": {
+                        "device": {
+                            "device_id": device_id,
+                            "device_fingerprint_hash": device_fingerprint_hash,
+                        }
+                    },
+                    "decision": "APPROVE",
+                    "decision_reason": "DEFAULT_ALLOW",
+                },
+            )
+            assert ingest_response.status_code in [200, 202, 409]
+
+            by_ip = await client.get("/api/v1/transactions", params={"ip_address": ip_address})
+            assert by_ip.status_code == 200
+            by_ip_data = by_ip.json()
+            assert len(by_ip_data["items"]) >= 1
+            assert all(
+                (item.get("transaction_context") or {}).get("ip_address") == ip_address
+                for item in by_ip_data["items"]
+            )
+
+            by_device = await client.get("/api/v1/transactions", params={"device_id": device_id})
+            assert by_device.status_code == 200
+            by_device_data = by_device.json()
+            assert len(by_device_data["items"]) >= 1
+            assert all(
+                ((item.get("transaction_context") or {}).get("device") or {}).get("device_id")
+                == device_id
+                for item in by_device_data["items"]
+            )
+
+            by_fingerprint = await client.get(
+                "/api/v1/transactions",
+                params={"device_fingerprint_hash": device_fingerprint_hash},
+            )
+            assert by_fingerprint.status_code == 200
+            by_fingerprint_data = by_fingerprint.json()
+            assert len(by_fingerprint_data["items"]) >= 1
+            assert all(
+                ((item.get("transaction_context") or {}).get("device") or {}).get(
+                    "device_fingerprint_hash"
+                )
+                == device_fingerprint_hash
+                for item in by_fingerprint_data["items"]
+            )
+
     async def test_get_nonexistent_transaction(self, client_app):
         """Test getting a transaction that doesn't exist."""
         transport = httpx.ASGITransport(app=client_app)

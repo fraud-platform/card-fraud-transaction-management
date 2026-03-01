@@ -55,6 +55,8 @@ uv run openapi
 
 For full endpoint details, use `docs/03-api/openapi.json`.
 
+`GET /api/v1/transactions` supports neighborhood filters: `ip_address`, `device_id`, and `device_fingerprint_hash`.
+
 ## Documentation
 
 - `AGENTS.md` - canonical agent instructions

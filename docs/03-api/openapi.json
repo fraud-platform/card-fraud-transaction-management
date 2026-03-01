@@ -4,17 +4,37 @@
     "title": "Card Fraud Transaction Management API",
     "description": "API for ingesting fraud decision events and querying transaction data. Uses PostgreSQL with the fraud_gov schema (shared with card-fraud-rule-management).",
     "version": "0.1.0",
-    "x-generated-at": "2026-02-01T08:53:07.334631+00:00"
+    "x-generated-at": "2026-03-01T07:04:17.541261+00:00"
   },
   "paths": {
-    "/health/": {
+    "/metrics": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get Metrics",
+        "description": "Prometheus metrics endpoint for scraping.\n\nSECURITY: Requires X-Metrics-Token header for authentication.\n\nReturns application metrics in Prometheus text format.",
+        "operationId": "get_metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
       "get": {
         "tags": [
           "Health"
         ],
         "summary": "Health check",
         "description": "Check if the service is running.",
-        "operationId": "health_check_health__get",
+        "operationId": "health_check_api_v1_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -29,14 +49,14 @@
         }
       }
     },
-    "/health/ready": {
+    "/api/v1/health/ready": {
       "get": {
         "tags": [
           "Health"
         ],
         "summary": "Readiness check",
         "description": "Check if the service is ready to receive traffic.",
-        "operationId": "readiness_check_health_ready_get",
+        "operationId": "readiness_check_api_v1_health_ready_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -51,14 +71,14 @@
         }
       }
     },
-    "/health/live": {
+    "/api/v1/health/live": {
       "get": {
         "tags": [
           "Health"
         ],
         "summary": "Liveness check",
         "description": "Kubernetes liveness probe endpoint.",
-        "operationId": "liveness_check_health_live_get",
+        "operationId": "liveness_check_api_v1_health_live_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -67,7 +87,7 @@
                 "schema": {
                   "additionalProperties": true,
                   "type": "object",
-                  "title": "Response Liveness Check Health Live Get"
+                  "title": "Response Liveness Check Api V1 Health Live Get"
                 }
               }
             }
@@ -193,6 +213,60 @@
               "title": "Card Id"
             },
             "description": "Filter by card ID"
+          },
+          {
+            "name": "ip_address",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by IP address",
+              "title": "Ip Address"
+            },
+            "description": "Filter by IP address"
+          },
+          {
+            "name": "device_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by device ID",
+              "title": "Device Id"
+            },
+            "description": "Filter by device ID"
+          },
+          {
+            "name": "device_fingerprint_hash",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by device fingerprint hash",
+              "title": "Device Fingerprint Hash"
+            },
+            "description": "Filter by device fingerprint hash"
           },
           {
             "name": "decision",

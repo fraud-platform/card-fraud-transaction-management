@@ -16,7 +16,8 @@ class TestConfig:
 
     def test_app_config_defaults(self):
         """Test AppConfig has correct defaults."""
-        config = AppConfig()
+        with patch.dict("os.environ", {"APP_ENV": "local"}):
+            config = AppConfig()
         assert config.name == "fraud-transaction-management"
         assert config.env.value == "local"
         assert config.version == "0.1.0"
