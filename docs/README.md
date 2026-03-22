@@ -2,6 +2,10 @@
 
 FastAPI service for decision-event ingestion, transaction query, and analyst workflows.
 
+Auth0 contract: the backend accepts the shared human-user audience (`AUTH0_USER_AUDIENCE`) and
+the service audience (`AUTH0_AUDIENCE`). See `07-reference/auth-model.md`.
+Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
+
 ## Quick Start
 
 ```powershell

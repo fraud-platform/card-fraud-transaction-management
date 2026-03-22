@@ -38,6 +38,7 @@ This guide covers setting up Doppler secrets for the card-fraud-transaction-mana
 | `DATABASE_URL_ADMIN` | `postgresql://postgres:postgres@localhost:5432/fraud_gov` | Admin connection |
 | `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka connection |
 | `AUTH0_DOMAIN` | `your-tenant.auth0.com` | Auth0 authentication |
+| `AUTH0_USER_AUDIENCE` | `https://fraud-governance-api` | Shared human-user audience |
 | `AUTH0_AUDIENCE` | `https://api.fraud-management.com` | Auth0 audience |
 
 ### Test Config (Neon Test Branch)
@@ -50,6 +51,7 @@ This guide covers setting up Doppler secrets for the card-fraud-transaction-mana
 | `FRAUD_GOV_ADMIN_PASSWORD` | (generated) | Admin user password |
 | `KAFKA_BOOTSTRAP_SERVERS` | `pkc-xxx.us-east-1.aws.confluent.cloud:9092` | Kafka (Confluent) |
 | `AUTH0_DOMAIN` | `your-tenant.auth0.com` | Auth0 |
+| `AUTH0_USER_AUDIENCE` | `https://fraud-governance-api` | Shared human-user audience |
 | `AUTH0_AUDIENCE` | `https://api.fraud-management.com` | Auth0 |
 
 ### Prod Config (Neon Main Branch)
@@ -62,6 +64,7 @@ This guide covers setting up Doppler secrets for the card-fraud-transaction-mana
 | `FRAUD_GOV_ADMIN_PASSWORD` | (generated) | Admin user password |
 | `KAFKA_BOOTSTRAP_SERVERS` | `pkc-xxx.us-east-1.aws.confluent.cloud:9092` | Kafka (Confluent) |
 | `AUTH0_DOMAIN` | `your-tenant.auth0.com` | Auth0 |
+| `AUTH0_USER_AUDIENCE` | `https://fraud-governance-api` | Shared human-user audience |
 | `AUTH0_AUDIENCE` | `https://api.fraud-management.com` | Auth0 |
 
 ## Password Workflow
@@ -250,6 +253,7 @@ When running commands with Doppler, these variables are injected:
 | `DOPPLER_CONFIG` | Current config name (local/test/prod) |
 | `KAFKA_BOOTSTRAP_SERVERS` | Kafka broker addresses |
 | `AUTH0_DOMAIN` | Auth0 tenant domain |
+| `AUTH0_USER_AUDIENCE` | Shared human-user audience |
 | `AUTH0_AUDIENCE` | Auth0 API identifier |
 
 ## Related Documentation

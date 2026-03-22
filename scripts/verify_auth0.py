@@ -333,8 +333,8 @@ class Auth0Verifier:
     def verify_trigger_bindings(self) -> VerificationResult:
         """Check if actions are bound to correct triggers."""
         try:
-            # Note: M2M tokens use scopes only, so we only check post-login trigger
-            # (credentials-exchange is not used - M2M gets scopes, not roles)
+            # Shared M2M permission normalization is managed by rule-management.
+            # This repo verifies only the local role and API bindings it owns.
             triggers_to_check = ["post-login"]
             bound_triggers = []
 
@@ -374,6 +374,40 @@ class Auth0Verifier:
                 message=f"Error checking trigger bindings: {e}",
             )
 
+    def verify_unified_api_exists(self) -> VerificationResult:
+        """Check if the unified human-user API exists for portal token validation.
+
+        Human tokens from the portal use audience https://fraud-governance-api.
+        This service must accept both its own M2M audience and the unified audience.
+        """
+        unified_audience = "https://fraud-governance-api"
+        try:
+            resp = self.client.get("resource-servers")
+            resp.raise_for_status()
+            apis = resp.json()
+
+            for api in apis:
+                if api.get("identifier") == unified_audience:
+                    return VerificationResult(
+                        name="Unified API Exists",
+                        passed=True,
+                        message=f"Unified API found: {api.get('name')} ({unified_audience})",
+                        details=[f"ID: {api.get('id')}"],
+                    )
+
+            return VerificationResult(
+                name="Unified API Exists",
+                passed=False,
+                message=f"Unified API with audience '{unified_audience}' not found",
+                details=["Human portal tokens require this API for dual-audience acceptance"],
+            )
+        except Exception as e:
+            return VerificationResult(
+                name="Unified API Exists",
+                passed=False,
+                message=f"Error checking unified API: {e}",
+            )
+
     def run_all_checks(self) -> list[VerificationResult]:
         """Run all verification checks."""
         self.results = [
@@ -384,6 +418,7 @@ class Auth0Verifier:
             self.verify_client_grant(),
             self.verify_actions_deployed(),
             self.verify_trigger_bindings(),
+            self.verify_unified_api_exists(),
         ]
         return self.results
 

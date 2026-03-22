@@ -1,4 +1,4 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 This is the canonical instruction file for coding agents working in `card-fraud-transaction-management`.
 
@@ -140,6 +140,10 @@ Base path: `/api/v1`
 
 Use `docs/03-api/openapi.json` as the API contract artifact.
 
+Auth0 note: `AUTH0_USER_AUDIENCE` is the shared human-user audience used by portal tokens and
+role namespaces; `AUTH0_AUDIENCE` remains the service audience for this API.
+Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
+
 ## Architecture Guardrails
 
 1. UUID strategy
@@ -197,7 +201,7 @@ uv run doppler-prod
 
 Bootstrap order across platform repos:
 
-1. `card-fraud-rule-management` first (shared roles, SPA, actions, test users)
+1. `card-fraud-rule-management` first (shared roles, SPA, test users, and the shared credentials-exchange Action that mirrors issued M2M scopes into `permissions`)
 2. this repo second (API + M2M app)
 
 ```powershell

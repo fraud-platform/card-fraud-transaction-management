@@ -1,4 +1,4 @@
-﻿# Card Fraud Transaction Management
+# Card Fraud Transaction Management
 
 FastAPI service for ingesting fraud decision events, storing them idempotently, and supporting analyst workflows (reviews, notes, cases, worklists, and bulk actions).
 
@@ -24,7 +24,7 @@ API docs (local): `http://localhost:8002/docs`
 - FastAPI
 - SQLAlchemy async + PostgreSQL
 - Kafka (Redpanda locally)
-- Auth0 JWT auth
+- Auth0 JWT auth with shared human-user and service audiences
 - Doppler secrets management
 
 ## High-Value Commands
@@ -70,5 +70,8 @@ For full endpoint details, use `docs/03-api/openapi.json`.
 - Doppler-first secrets management (no `.env` workflow for normal usage)
 - No raw PAN storage
 - Tokenized card identifiers only
+- Auth0 accepts the shared human-user audience (`AUTH0_USER_AUDIENCE`) and this service's
+  audience (`AUTH0_AUDIENCE`)
+- Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
 - Local-only JWT bypass guarded by config validation
 - `/metrics` requires `X-Metrics-Token` (`METRICS_TOKEN` must be configured)

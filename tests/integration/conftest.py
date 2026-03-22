@@ -15,6 +15,7 @@ if "DATABASE_URL_APP" not in os.environ:
         "2. For local dev without Doppler: Create .env.test file and set ENV_FILE=.env.test\n"
     )
 os.environ.setdefault("AUTH0_DOMAIN", "test.local")
+os.environ.setdefault("AUTH0_USER_AUDIENCE", "https://fraud-governance-api")
 os.environ.setdefault("AUTH0_AUDIENCE", "test-audience")
 os.environ.setdefault("AUTH0_ALGORITHMS", "RS256")
 os.environ.setdefault("FEATURE_ENABLE_AUTO_REVIEW_CREATION", "false")
@@ -38,7 +39,7 @@ def client_app():
     def mock_current_user() -> dict:
         return {
             "sub": "test_user_integration",
-            "https://fraud-transaction-management-api/roles": ["FRAUD_ANALYST"],
+            "https://fraud-governance-api/roles": ["FRAUD_ANALYST"],
             "permissions": ["txn:view", "txn:comment"],
         }
 

@@ -31,6 +31,7 @@ if "DATABASE_URL_APP" not in os.environ:
     )
 
 os.environ.setdefault("AUTH0_DOMAIN", "test.local")
+os.environ.setdefault("AUTH0_USER_AUDIENCE", "https://fraud-governance-api")
 os.environ.setdefault("AUTH0_AUDIENCE", "test-audience")
 os.environ.setdefault("AUTH0_ALGORITHMS", "RS256")
 os.environ.setdefault("FEATURE_ENABLE_AUTO_REVIEW_CREATION", "true")  # Enable for E2E tests

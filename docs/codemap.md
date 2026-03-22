@@ -3,6 +3,8 @@
 ## Repository Purpose
 
 FastAPI service for decision-event ingestion, transaction query, and analyst workflows.
+Auth0 runtime accepts the shared human-user audience plus the service audience.
+Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
 
 ## Documentation Layout
 

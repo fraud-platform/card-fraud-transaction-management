@@ -411,6 +411,10 @@ def _action_code_credentials_exchange(audience: str, m2m_roles: list[str]) -> st
         "exports.onExecuteCredentialsExchange = async (event, api) => {\n"
         f"  const namespace = {audience!r};\n"
         f"  api.accessToken.setCustomClaim(`${{namespace}}/roles`, {roles_js});\n"
+        "  // Mirror the issued access token scopes into the permissions claim so\n"
+        "  // backends read one claim for both human and M2M tokens.\n"
+        "  const scopes = Array.isArray(event.accessToken.scope) ? event.accessToken.scope : [];\n"
+        "  api.accessToken.setCustomClaim('permissions', scopes);\n"
         "};\n"
     )
 
@@ -451,6 +455,23 @@ def ensure_roles(mgmt: Auth0Mgmt, *, roles: list[tuple[str, str]], verbose: bool
     return out
 
 
+def _expand_callback_urls(urls: list[str]) -> list[str]:
+    """For each origin URL, ensure both the base and /callback path are present.
+
+    Auth0 requires exact redirect_uri matching. The SPA PKCE flow redirects to
+    /callback, so we must include it alongside the base URL.
+    """
+    expanded: list[str] = []
+    for url in urls:
+        url = url.rstrip("/")
+        if url not in expanded:
+            expanded.append(url)
+        cb = url + "/callback"
+        if cb not in expanded:
+            expanded.append(cb)
+    return expanded
+
+
 def ensure_spa_client(
     mgmt: Auth0Mgmt,
     *,
@@ -462,12 +483,15 @@ def ensure_spa_client(
 ) -> dict:
     existing = mgmt.find_client_by_name(name)
 
+    # Auto-expand callbacks to include /callback path for SPA PKCE flow
+    expanded_callbacks = _expand_callback_urls(callbacks)
+
     payload = {
         "app_type": "spa",
         # SPA best-practice: no client secret.
         "token_endpoint_auth_method": "none",
         "grant_types": ["authorization_code", "refresh_token"],
-        "callbacks": callbacks,
+        "callbacks": expanded_callbacks,
         "allowed_logout_urls": logout_urls,
         "web_origins": origins,
         "allowed_origins": origins,

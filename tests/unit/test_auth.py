@@ -48,6 +48,7 @@ from tests.conftest import (
     MOCK_PLATFORM_ADMIN_TOKEN,
     MOCK_VIEW_ONLY_TOKEN,
     ROLES_CLAIM,
+    SERVICE_ROLES_CLAIM,
 )
 
 
@@ -249,11 +250,13 @@ class TestGetUserRoles:
     def test_valid_roles(self):
         """Test extracting roles from payload."""
         mock_settings = MagicMock()
+        mock_settings.auth0.user_audience = "https://fraud-governance-api"
         mock_settings.auth0.audience = "https://fraud-transaction-management-api"
 
         payload = {
             "sub": "auth0|12345",
             ROLES_CLAIM: [FRAUD_ANALYST, PLATFORM_ADMIN],
+            SERVICE_ROLES_CLAIM: [FRAUD_SUPERVISOR],
         }
 
         with patch("app.core.auth.get_settings", return_value=mock_settings):
@@ -263,6 +266,7 @@ class TestGetUserRoles:
     def test_empty_roles(self):
         """Test empty roles list."""
         mock_settings = MagicMock()
+        mock_settings.auth0.user_audience = "https://fraud-governance-api"
         mock_settings.auth0.audience = "https://fraud-transaction-management-api"
 
         payload = {"sub": "auth0|12345"}
@@ -273,6 +277,7 @@ class TestGetUserRoles:
     def test_malformed_roles(self):
         """Test malformed roles claim returns empty list."""
         mock_settings = MagicMock()
+        mock_settings.auth0.user_audience = "https://fraud-governance-api"
         mock_settings.auth0.audience = "https://fraud-transaction-management-api"
 
         payload = {
@@ -282,6 +287,21 @@ class TestGetUserRoles:
         with patch("app.core.auth.get_settings", return_value=mock_settings):
             result = get_user_roles(payload)
             assert result == []
+
+    def test_service_audience_roles_fallback(self):
+        """Test service audience roles are used when user audience is missing."""
+        mock_settings = MagicMock()
+        mock_settings.auth0.user_audience = "https://fraud-governance-api"
+        mock_settings.auth0.audience = "https://fraud-transaction-management-api"
+
+        payload = {
+            "sub": "auth0|12345",
+            SERVICE_ROLES_CLAIM: [FRAUD_SUPERVISOR],
+        }
+
+        with patch("app.core.auth.get_settings", return_value=mock_settings):
+            result = get_user_roles(payload)
+            assert result == [FRAUD_SUPERVISOR]
 
 
 class TestGetUserPermissions:
@@ -328,6 +348,16 @@ class TestGetUserPermissions:
         assert TXN_APPROVE in result
         assert TXN_BLOCK in result
         assert TXN_OVERRIDE in result
+
+    def test_m2m_with_injected_permissions(self):
+        """M2M tokens get permissions injected by onExecuteCredentialsExchange Action."""
+        payload = {
+            "sub": "m2m-client",
+            "gty": "client-credentials",
+            "permissions": [TXN_VIEW, TXN_BLOCK],
+        }
+        result = get_user_permissions(payload)
+        assert result == [TXN_VIEW, TXN_BLOCK]
 
 
 class TestRequirePermission:
@@ -410,9 +440,11 @@ class TestRequireRoles:
         )
 
         dependency = require_roles(FRAUD_SUPERVISOR, PLATFORM_ADMIN)
-        with pytest.raises(ForbiddenError) as exc_info:
-            dependency(user)
-        assert "required_roles" in exc_info.value.details
+        with patch("app.core.auth.get_settings") as mock_get_settings:
+            mock_get_settings.return_value.security.sanitize_errors = False
+            with pytest.raises(ForbiddenError) as exc_info:
+                dependency(user)
+            assert "required_roles" in exc_info.value.details
 
 
 class TestRequireRole:
@@ -444,9 +476,11 @@ class TestRequireRole:
         )
 
         dependency = require_role(FRAUD_ANALYST)
-        with pytest.raises(ForbiddenError) as exc_info:
-            dependency(user)
-        assert FRAUD_ANALYST in str(exc_info.value.details.get("required_role", ""))
+        with patch("app.core.auth.get_settings") as mock_get_settings:
+            mock_get_settings.return_value.security.sanitize_errors = False
+            with pytest.raises(ForbiddenError) as exc_info:
+                dependency(user)
+            assert FRAUD_ANALYST in str(exc_info.value.details.get("required_role", ""))
 
 
 class TestJWKSCache:
@@ -494,6 +528,37 @@ class TestVerifyToken:
                     }
                     result = verify_token("test-token")
                     assert result["sub"] == "auth0|12345"
+
+    def test_verify_token_retries_supported_audiences(self):
+        """Test token verification retries configured audiences."""
+        mock_rsa_key = {
+            "kty": "RSA",
+            "kid": "test-kid",
+            "use": "sig",
+            "n": "test-n",
+            "e": "test-e",
+        }
+
+        mock_payload = {
+            "sub": "auth0|12345",
+            "email": "test@example.com",
+        }
+
+        mock_settings = MagicMock()
+        mock_settings.auth0.user_audience = "https://fraud-governance-api"
+        mock_settings.auth0.audience = "https://fraud-transaction-management-api"
+        mock_settings.auth0.algorithms_list = ["RS256"]
+        mock_settings.auth0.issuer_url = "https://test.local/"
+
+        with patch("app.core.auth.get_rsa_key", return_value=mock_rsa_key):
+            with patch("app.core.auth.get_settings", return_value=mock_settings):
+                with patch(
+                    "app.core.auth.jwt.decode",
+                    side_effect=[JWTClaimsError("audience mismatch"), mock_payload],
+                ) as mock_decode:
+                    result = verify_token("test-token")
+                    assert result["sub"] == "auth0|12345"
+                    assert mock_decode.call_count == 2
 
 
 class TestGetCurrentUser:

@@ -78,7 +78,8 @@
 | Variable | Type | Required | Default | Description |
 |----------|------|----------|---------|-------------|
 | `AUTH0_DOMAIN` | string | Yes | - | Auth0 domain |
-| `AUTH0_AUDIENCE` | string | Yes | - | API audience |
+| `AUTH0_USER_AUDIENCE` | string | No | - | Shared human-user audience for portal tokens and role namespaces |
+| `AUTH0_AUDIENCE` | string | Yes | - | Service audience for this API |
 | `AUTH0_CLIENT_ID` | string | Yes | - | Auth0 client ID |
 | `AUTH0_CLIENT_SECRET` | secret | Yes | - | Auth0 client secret |
 | `AUTH0_ALGORITHMS` | string | No | `RS256` | JWT algorithms |
@@ -314,6 +315,7 @@ KAFKA_SASL_USERNAME=
 KAFKA_SASL_PASSWORD=
 
 AUTH0_DOMAIN=localhost
+AUTH0_USER_AUDIENCE=https://fraud-governance-api
 AUTH0_AUDIENCE=http://localhost:8080
 AUTH0_CLIENT_ID=local-client
 AUTH0_CLIENT_SECRET=local-secret

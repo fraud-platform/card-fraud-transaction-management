@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 # Set test environment variables before importing app
 # Unit tests use mocks, so these are just defaults
 os.environ.setdefault("AUTH0_DOMAIN", "test.local")
+os.environ.setdefault("AUTH0_USER_AUDIENCE", "https://fraud-governance-api")
 os.environ.setdefault("AUTH0_AUDIENCE", "https://fraud-transaction-management-api")
 os.environ.setdefault("AUTH0_ALGORITHMS", "RS256")
 
@@ -28,14 +29,17 @@ os.environ.setdefault("AUTH0_ALGORITHMS", "RS256")
 # Mock Token Payloads (matching AUTH_MODEL.md role/permission structure)
 # =============================================================================
 
-# Namespace for roles claim (matches Auth0 configuration)
-ROLES_CLAIM = "https://fraud-transaction-management-api/roles"
+# Namespaces for roles claims (matches Auth0 configuration)
+USER_ROLES_CLAIM = "https://fraud-governance-api/roles"
+SERVICE_ROLES_CLAIM = "https://fraud-transaction-management-api/roles"
+ROLES_CLAIM = USER_ROLES_CLAIM
 
 # Platform Admin - full access
 MOCK_PLATFORM_ADMIN_TOKEN = {
     "sub": "auth0|test-platform-admin",
     "email": "test-platform-admin@fraud-platform.test",
     ROLES_CLAIM: ["PLATFORM_ADMIN"],
+    SERVICE_ROLES_CLAIM: ["PLATFORM_ADMIN"],
     "permissions": [
         "txn:view",
         "txn:comment",
@@ -53,6 +57,7 @@ MOCK_FRAUD_ANALYST_TOKEN = {
     "sub": "auth0|test-fraud-analyst",
     "email": "test-fraud-analyst@fraud-platform.test",
     ROLES_CLAIM: ["FRAUD_ANALYST"],
+    SERVICE_ROLES_CLAIM: ["FRAUD_ANALYST"],
     "permissions": ["txn:view", "txn:comment", "txn:flag", "txn:recommend"],
     "exp": 9999999999,
 }
@@ -62,6 +67,7 @@ MOCK_FRAUD_SUPERVISOR_TOKEN = {
     "sub": "auth0|test-fraud-supervisor",
     "email": "test-fraud-supervisor@fraud-platform.test",
     ROLES_CLAIM: ["FRAUD_SUPERVISOR"],
+    SERVICE_ROLES_CLAIM: ["FRAUD_SUPERVISOR"],
     "permissions": ["txn:view", "txn:approve", "txn:block", "txn:override"],
     "exp": 9999999999,
 }
@@ -71,6 +77,7 @@ MOCK_NO_ROLE_TOKEN = {
     "sub": "auth0|test-no-role",
     "email": "test-no-role@fraud-platform.test",
     ROLES_CLAIM: [],
+    SERVICE_ROLES_CLAIM: [],
     "permissions": [],
     "exp": 9999999999,
 }
@@ -80,6 +87,7 @@ MOCK_VIEW_ONLY_TOKEN = {
     "sub": "auth0|test-view-only",
     "email": "test-view-only@fraud-platform.test",
     ROLES_CLAIM: [],
+    SERVICE_ROLES_CLAIM: [],
     "permissions": ["txn:view"],
     "exp": 9999999999,
 }

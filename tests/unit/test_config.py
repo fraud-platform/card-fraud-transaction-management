@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from app.core.config import (
     AppConfig,
+    Auth0Config,
     DatabaseConfig,
     KafkaConfig,
     Settings,
@@ -93,6 +94,18 @@ class TestConfig:
         assert config.enabled is True
         assert config.bootstrap_servers == "localhost:9092"
         assert config.consumer_group_id == "test-group"
+
+    def test_auth0_audience_candidates(self):
+        """Test Auth0 audience precedence for user and service tokens."""
+        config = Auth0Config(
+            audience="https://fraud-transaction-management-api",
+            user_audience="https://fraud-governance-api",
+        )
+
+        assert config.audience_candidates == [
+            "https://fraud-governance-api",
+            "https://fraud-transaction-management-api",
+        ]
 
     def test_get_settings_cached(self):
         """Test that get_settings returns cached instance."""

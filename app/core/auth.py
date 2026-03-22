@@ -25,9 +25,6 @@ from app.core.errors import ForbiddenError, UnauthorizedError
 
 logger = logging.getLogger(__name__)
 
-# Sync HTTP client - used by sync methods (tests only)
-_http = httpx.Client(timeout=httpx.Timeout(10.0))
-
 # =============================================================================
 # Role Constants (this project's roles - see AUTH_MODEL.md)
 # =============================================================================
@@ -112,6 +109,30 @@ class AuthenticatedUser(BaseModel):
     def has_role(self, role: str) -> bool:
         """Check if user has a specific role."""
         return role in self.roles
+
+
+def _resolve_audience_candidates() -> list[str]:
+    """Return configured audiences in precedence order."""
+    settings = get_settings()
+
+    candidates = getattr(settings.auth0, "audience_candidates", None)
+    if isinstance(candidates, (list, tuple)):
+        resolved = [
+            str(value).strip() for value in candidates if isinstance(value, str) and value.strip()
+        ]
+        if resolved:
+            return resolved
+
+    resolved: list[str] = []
+    for value in (
+        getattr(settings.auth0, "user_audience", None),
+        getattr(settings.auth0, "audience", None),
+    ):
+        if isinstance(value, str):
+            trimmed = value.strip()
+            if trimmed and trimmed not in resolved:
+                resolved.append(trimmed)
+    return resolved
 
 
 class CircuitBreakerState(Enum):
@@ -474,33 +495,46 @@ def _verify_token_with_key(token: str, rsa_key: dict[str, Any]) -> dict[str, Any
     Shared implementation for both sync and async code paths.
     """
     settings = get_settings()
+    audiences = _resolve_audience_candidates()
+    if not audiences and settings.auth0.audience:
+        audiences = [settings.auth0.audience]
+    if not audiences:
+        logger.error("No Auth0 audience configured")
+        raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG)
 
-    try:
-        payload = jwt.decode(
-            token,
-            rsa_key,
-            algorithms=settings.auth0.algorithms_list,
-            audience=settings.auth0.audience,
-            issuer=settings.auth0.issuer_url,
-        )
-        logger.debug(f"Token verified successfully for subject: {payload.get('sub')}")
-        return payload
+    last_claims_error: Exception | None = None
 
-    except jwt.ExpiredSignatureError:
-        logger.warning("Token has expired")
-        raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+    for audience in audiences:
+        try:
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=settings.auth0.algorithms_list,
+                audience=audience,
+                issuer=settings.auth0.issuer_url,
+            )
+            logger.debug(f"Token verified successfully for subject: {payload.get('sub')}")
+            return payload
 
-    except jwt.JWTClaimsError as e:
-        logger.warning(f"Invalid token claims: {e}")
-        raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+        except jwt.ExpiredSignatureError:
+            logger.warning("Token has expired")
+            raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
 
-    except JWTError as e:
-        logger.warning(f"JWT verification failed: {e}")
-        raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+        except jwt.JWTClaimsError as e:
+            last_claims_error = e
+            continue
 
-    except Exception as e:
-        logger.error(f"Unexpected error during token verification: {e}")
-        raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+        except JWTError as e:
+            logger.warning(f"JWT verification failed: {e}")
+            raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+
+        except Exception as e:
+            logger.error(f"Unexpected error during token verification: {e}")
+            raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG) from None
+
+    if last_claims_error is not None:
+        logger.warning(f"Invalid token claims: {last_claims_error}")
+    raise UnauthorizedError(INVALID_OR_EXPIRED_TOKEN_MSG)
 
 
 def verify_token(token: str) -> dict[str, Any]:
@@ -588,11 +622,26 @@ def get_user_sub(payload: dict[str, Any]) -> str:
 
 def get_user_roles(payload: dict[str, Any]) -> list[str]:
     settings = get_settings()
-    roles_claim = f"{settings.auth0.audience}/roles"
-    roles = payload.get(roles_claim, [])
+    candidates = _resolve_audience_candidates()
+    if not candidates and settings.auth0.audience:
+        candidates = [settings.auth0.audience]
 
+    for audience in candidates:
+        roles_claim = f"{audience}/roles"
+        roles = payload.get(roles_claim)
+        if roles is None:
+            continue
+
+        if not isinstance(roles, list):
+            logger.warning(f"Roles claim is not a list: {type(roles)}")
+            return []
+
+        return roles
+
+    roles = payload.get("roles", [])
     if not isinstance(roles, list):
-        logger.warning(f"Roles claim is not a list: {type(roles)}")
+        if roles:
+            logger.warning(f"Roles claim is not a list: {type(roles)}")
         return []
 
     return roles
@@ -601,8 +650,10 @@ def get_user_roles(payload: dict[str, Any]) -> list[str]:
 def get_user_permissions(payload: dict[str, Any]) -> list[str]:
     """Extract permissions from JWT payload.
 
-    Auth0 adds permissions to the token when RBAC is enabled.
-    The permissions claim is at the top level of the token.
+    Auth0 adds permissions to human user tokens when RBAC is enabled.
+    M2M tokens get permissions injected by the onExecuteCredentialsExchange
+    Action (deployed by card-fraud-rule-management bootstrap).
+    Both token types use the top-level 'permissions' array claim.
     """
     permissions = payload.get("permissions", [])
 
@@ -611,6 +662,14 @@ def get_user_permissions(payload: dict[str, Any]) -> list[str]:
         return []
 
     return permissions
+
+
+def _raise_forbidden(details: dict[str, Any]) -> None:
+    """Raise ForbiddenError with optional detail sanitization."""
+    settings = get_settings()
+    if settings.security.sanitize_errors:
+        raise ForbiddenError("Insufficient permissions")
+    raise ForbiddenError("Insufficient permissions", details=details)
 
 
 def require_permission(required_permission: str):
@@ -640,19 +699,12 @@ def require_permission(required_permission: str):
                 required_permission,
                 user.permissions,
             )
-            # Sanitize error details in production to prevent information leakage
-            settings = get_settings()
-            if settings.security.sanitize_errors:
-                raise ForbiddenError("Insufficient permissions")
-            else:
-                # Development mode: include details for debugging
-                raise ForbiddenError(
-                    "Insufficient permissions",
-                    details={
-                        "required_permission": required_permission,
-                        "user_permissions": user.permissions,
-                    },
-                )
+            _raise_forbidden(
+                {
+                    "required_permission": required_permission,
+                    "user_permissions": user.permissions,
+                }
+            )
 
         logger.debug("Permission check passed: user has %s permission", required_permission)
         return user
@@ -680,10 +732,7 @@ def require_roles(*allowed_roles: str):
                 allowed_roles,
                 user.roles,
             )
-            raise ForbiddenError(
-                "Insufficient permissions",
-                details={"required_roles": list(allowed_roles), "user_roles": user.roles},
-            )
+            _raise_forbidden({"required_roles": list(allowed_roles), "user_roles": user.roles})
 
         logger.debug("Role check passed: user has one of %s roles", allowed_roles)
         return user
@@ -700,10 +749,7 @@ def require_role(required_role: str):
                 required_role,
                 user.roles,
             )
-            raise ForbiddenError(
-                "Insufficient permissions",
-                details={"required_role": required_role, "user_roles": user.roles},
-            )
+            _raise_forbidden({"required_role": required_role, "user_roles": user.roles})
 
         logger.debug("Role check passed: user has %s role", required_role)
         return user

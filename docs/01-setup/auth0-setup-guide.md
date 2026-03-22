@@ -180,6 +180,8 @@ uv run auth0-bootstrap --yes --verbose
 - Permissions: `txn:view`, `txn:comment`, `txn:flag`, `txn:recommend`, `txn:approve`, `txn:block`, `txn:override`
 - M2M App: `Fraud Transaction Management M2M`
 - Uses shared roles (created by rule-management)
+- Shared human-user audience: `https://fraud-governance-api`
+- Service audience: `https://fraud-transaction-management-api`
 - **Auto-synced to Doppler:**
   - `AUTH0_CLIENT_ID` - M2M client ID
   - `AUTH0_CLIENT_SECRET` - M2M client secret
@@ -406,7 +408,7 @@ AUTH0_CLIENT_SECRET: <auto-synced-by-bootstrap>
 
 # SPA Configuration - MANUAL SETUP REQUIRED
 AUTH0_SPA_APP_NAME: Fraud Intelligence Portal
-AUTH0_SPA_CALLBACK_URLS: http://localhost:3000,http://localhost:5173
+AUTH0_SPA_CALLBACK_URLS: http://localhost:3000/callback,http://localhost:5173/callback
 AUTH0_SPA_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
 AUTH0_SPA_ALLOWED_LOGOUT_URLS: http://localhost:3000,http://localhost:5173
 
@@ -437,4 +439,3 @@ doppler secrets set --project card-fraud-intelligence-portal --config local \
 ---
 
 **End of Document**
-

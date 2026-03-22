@@ -186,6 +186,7 @@ class S3Config(BaseSettings):
 class Auth0Config(BaseSettings):
     domain: str = Field(default="")
     audience: str = Field(default="")
+    user_audience: str = Field(default="")
     client_id: str = Field(default="")
     client_secret: SecretStr = Field(default=SecretStr(""))
     algorithms: str = Field(default="RS256")  # Comma-separated string like rule-management
@@ -208,6 +209,16 @@ class Auth0Config(BaseSettings):
     def algorithms_list(self) -> list[str]:
         """Parse Auth0 algorithms string into a list."""
         return [algo.strip() for algo in self.algorithms.split(",")]
+
+    @property
+    def audience_candidates(self) -> list[str]:
+        """Return configured audiences in precedence order."""
+        candidates: list[str] = []
+        for value in (self.user_audience, self.audience):
+            trimmed = value.strip()
+            if trimmed and trimmed not in candidates:
+                candidates.append(trimmed)
+        return candidates
 
 
 class RuleManagementConfig(BaseSettings):
