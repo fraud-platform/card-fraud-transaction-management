@@ -52,7 +52,24 @@ class TestCreateApp:
 
         with patch("app.main.get_settings", return_value=mock_settings):
             app = create_app()
-            route_paths = [r.path for r in app.routes]
+
+            def collect_route_paths(routes, prefix=""):
+                paths = []
+                for route in routes:
+                    path = getattr(route, "path", None)
+                    if path is not None:
+                        paths.append(f"{prefix}{path}")
+                    nested_routes = getattr(route, "routes", None)
+                    if nested_routes is None:
+                        original_router = getattr(route, "original_router", None)
+                        nested_routes = getattr(original_router, "routes", None)
+                    if nested_routes:
+                        include_context = getattr(route, "include_context", None)
+                        nested_prefix = prefix + getattr(include_context, "prefix", "")
+                        paths.extend(collect_route_paths(nested_routes, nested_prefix))
+                return paths
+
+            route_paths = collect_route_paths(app.routes)
             assert "/api/v1/health" in route_paths or any(
                 "/api/v1/health" in p for p in route_paths
             )

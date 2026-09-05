@@ -2,7 +2,7 @@
 
 > **Single source of truth** for Auth0 configuration across all projects.
 
-**Last Updated:** 2026-01-18
+**Last Updated:** 2026-09-04
 
 ---
 
@@ -116,6 +116,18 @@ After running bootstrap, enable RBAC for each API:
      - Enable "Add Permissions in the Access Token"
    - Save
    ```
+
+### 2.5 Token Boundary for This Service
+
+Transaction Management accepts human-user tokens minted by the portal for
+browser-originated calls and uses its own M2M client-credentials application
+for service automation. Its bootstrap and runtime do not use
+`AUTH0_TEST_CLIENT_ID`, `AUTH0_TEST_CLIENT_SECRET`, or role-user passwords.
+
+The development `Local Test Client` is maintained by rule-management and is
+used only by role-specific portal/rule-management tests. Keep Auth0 Suspicious
+IP Throttling and Brute-force Protection enabled; local allowlisting belongs in
+the tenant protection settings when needed.
 
 ---
 

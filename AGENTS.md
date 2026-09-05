@@ -9,6 +9,7 @@ Use this file first. Keep `CLAUDE.md` as a pointer to this file only.
 - Secrets: Doppler-only workflows. Do not create or commit `.env` files.
 - Commands: use repository wrappers from `pyproject.toml` or `package.json`; avoid ad-hoc commands.
 - Git hooks: run `git config core.hooksPath .githooks` after clone to enable pre-push guards.
+- Git workflow: work only on local `main`; do not create branches or linked worktrees. Push only `origin/main`. The pre-push guard covers Codex and Claude sessions; agents require `CARD_FRAUD_ALLOW_GIT_PUSH=1` for an explicitly requested push.
 - Docs publishing: keep only curated docs in `docs/01-setup` through `docs/07-reference`, plus `docs/README.md` and `docs/codemap.md`.
 - Docs naming: use lowercase kebab-case for docs files. Exceptions: `README.md`, `codemap.md`, and generated contract files.
 - Never commit docs/planning artifacts named `todo`, `status`, `archive`, or session notes.
@@ -30,6 +31,7 @@ Use this file first. Keep `CLAUDE.md` as a pointer to this file only.
 - Data safety: only manage this service's tables and topics.
 - IDs: generate UUIDv7 in application code, never via DB defaults.
 - Auth bypass: `SECURITY_SKIP_JWT_VALIDATION=true` is allowed only when `APP_ENV=local`.
+- Auth0 boundary: this service does not use the development `Local Test Client` or role passwords. Human tokens come from the portal; service automation uses this service's M2M client-credentials client.
 
 ## Quick Start
 

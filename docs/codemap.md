@@ -4,6 +4,8 @@
 
 FastAPI service for decision-event ingestion, transaction query, and analyst workflows.
 Auth0 runtime accepts the shared human-user audience plus the service audience.
+Runtime and test setup do not perform role-user/password-realm Auth0 logins;
+the separate Local Test Client belongs to portal/rule-management testing.
 Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
 
 ## Documentation Layout

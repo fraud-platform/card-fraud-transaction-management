@@ -25,6 +25,9 @@ API docs (local): `http://localhost:8002/docs`
 - SQLAlchemy async + PostgreSQL
 - Kafka (Redpanda locally)
 - Auth0 JWT auth with shared human-user and service audiences
+- Runtime uses the service's M2M client-credentials flow for automation and
+  consumes human tokens issued by the portal. It does not perform role-user
+  password-realm logins or use the development `Local Test Client` directly.
 - Doppler secrets management
 
 ## High-Value Commands

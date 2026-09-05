@@ -62,7 +62,7 @@ This document defines the authoritative authentication and authorization model f
 | Client Name                      | Type    | Doppler Key / Notes                                   | Purpose                                              |
 | -------------------------------- | ------- | ----------------------------------------------------- | ---------------------------------------------------- |
 | Fraud Intelligence Portal        | SPA     | `VITE_AUTH0_CLIENT_ID` (portal project)               | Browser login (PKCE)                                 |
-| Local Test Client                | M2M     | `E2E_AUTH0_CLIENT_ID` / `AUTH0_TEST_CLIENT_ID`        | E2E password-realm tests                             |
+| Local Test Client                | Confidential test client | Owned by rule-management; portal aliases `E2E_AUTH0_CLIENT_ID` + `E2E_AUTH0_CLIENT_SECRET` | Not used by transaction-management runtime/tests |
 | Auth0 Management Automation      | M2M     | `AUTH0_MGMT_CLIENT_ID` (all backend projects)         | Management API automation                            |
 | Fraud Rule Management M2M        | M2M     | `AUTH0_CLIENT_ID` (rule-management project)           | Rule management service-to-service                   |
 | Fraud Transaction Management M2M | M2M     | `AUTH0_CLIENT_ID` (transaction-management project)    | Transaction management service-to-service            |
@@ -389,33 +389,15 @@ TEST_USERS = [
 
 ### 10.4 Using Test Users in Playwright
 
-```typescript
-// playwright/auth.setup.ts
-import { test as setup } from "@playwright/test";
+The transaction-management service does not acquire role-user tokens. Its
+browser calls use the portal-issued human token, while service automation uses
+the transaction-management M2M client. Role-specific password-realm tokens
+are owned by portal/rule-management test helpers and must be reused per
+worker/process rather than requested per test.
 
-const testUsers = {
-  ruleMaker: {
-    email: process.env.TEST_USER_RULE_MAKER_EMAIL,
-    password: process.env.TEST_USER_RULE_MAKER_PASSWORD,
-  },
-  ruleChecker: {
-    email: process.env.TEST_USER_RULE_CHECKER_EMAIL,
-    password: process.env.TEST_USER_RULE_CHECKER_PASSWORD,
-  },
-  // ... etc
-};
-
-setup("authenticate as rule maker", async ({ page }) => {
-  await page.goto("/login");
-  await page.fill('[name="email"]', testUsers.ruleMaker.email);
-  await page.fill('[name="password"]', testUsers.ruleMaker.password);
-  await page.click('[type="submit"]');
-  await page.waitForURL("/dashboard");
-
-  // Save auth state
-  await page.context().storageState({ path: ".auth/rule-maker.json" });
-});
-```
+Do not add a transaction-management password-grant helper or a per-test
+browser login. Use the portal's existing authenticated context for human
+flows and the service M2M client for automation.
 
 ---
 

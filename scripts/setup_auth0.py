@@ -2,7 +2,7 @@
 
 This script provisions Auth0 objects for the Transaction Management API:
 - Resource Server (API) with txn:* permissions
-- M2M Application for testing
+- M2M Application for service automation
 - Client Grant with all scopes
 
 NOTE: This script does NOT create roles. Roles are managed by
@@ -638,7 +638,7 @@ def main() -> int:
         print(f"Audience: {settings.audience}")
         print("\nThis will create/update:")
         print("  - API (Resource Server) with txn:* permissions")
-        print("  - M2M application for testing")
+        print("  - M2M application for service automation")
         print("\nNOTE: Roles are managed by card-fraud-rule-management.")
         print("      Run that bootstrap first if roles don't exist.")
         print("\nRe-run is safe (idempotent). Continue? [y/N] ", end="")

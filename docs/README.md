@@ -4,6 +4,9 @@ FastAPI service for decision-event ingestion, transaction query, and analyst wor
 
 Auth0 contract: the backend accepts the shared human-user audience (`AUTH0_USER_AUDIENCE`) and
 the service audience (`AUTH0_AUDIENCE`). See `07-reference/auth-model.md`.
+This service does not perform password-realm logins; the development `Local
+Test Client` is owned by rule-management and consumed only by role-specific
+portal/rule-management tests.
 Shared M2M normalization comes from the rule-management credentials-exchange Action, which mirrors issued access-token scopes into `permissions`.
 
 ## Quick Start

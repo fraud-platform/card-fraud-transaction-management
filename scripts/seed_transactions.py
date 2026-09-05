@@ -1,4 +1,4 @@
-﻿"""Seed realistic transaction mix for integration and e2e testing.
+"""Seed realistic transaction mix for integration and e2e testing.
 
 Uses deterministic UUIDv7 values for seeded IDs.
 Idempotent: repeated runs target the same transaction identifiers.
@@ -606,4 +606,3 @@ async def seed_transactions() -> None:
 
 if __name__ == "__main__":
     asyncio.run(seed_transactions())
-

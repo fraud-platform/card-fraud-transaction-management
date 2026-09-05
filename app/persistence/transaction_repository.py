@@ -404,12 +404,8 @@ class TransactionRepository:
                 "velocity_snapshot": self._to_jsonb_param(
                     transaction_data.get("velocity_snapshot")
                 ),
-                "velocity_results": self._to_jsonb_param(
-                    transaction_data.get("velocity_results")
-                ),
-                "engine_metadata": self._to_jsonb_param(
-                    transaction_data.get("engine_metadata")
-                ),
+                "velocity_results": self._to_jsonb_param(transaction_data.get("velocity_results")),
+                "engine_metadata": self._to_jsonb_param(transaction_data.get("engine_metadata")),
                 "transaction_timestamp": transaction_data["occurred_at"],
                 "ingestion_timestamp": datetime.utcnow(),
                 "kafka_topic": transaction_data.get("kafka_topic"),
